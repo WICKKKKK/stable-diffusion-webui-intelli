@@ -6,9 +6,12 @@ if not defined VENV_DIR (set "VENV_DIR=%~dp0%venv")
 
 set ERROR_REPORTING=FALSE
 
+rem 2>NUL 避免打印error信息
 mkdir tmp 2>NUL
 
+rem 创建 std 输出文件
 %PYTHON% -c "" >tmp/stdout.txt 2>tmp/stderr.txt
+rem errorlevel 为 0 代表上一条命令成功
 if %ERRORLEVEL% == 0 goto :check_pip
 echo Couldn't launch python
 goto :show_stdout_stderr
@@ -29,6 +32,8 @@ if ["%SKIP_VENV%"] == ["1"] goto :skip_venv
 dir "%VENV_DIR%\Scripts\Python.exe" >tmp/stdout.txt 2>tmp/stderr.txt
 if %ERRORLEVEL% == 0 goto :activate_venv
 
+rem /f 表示对文件或者字符串进行操作， delims 表示不使用任何分隔符对输入进行分割
+rem 这里用 for 循环实际上是为了捕获 CALL 命令的输出，并没有进行 loop
 for /f "delims=" %%i in ('CALL %PYTHON% -c "import sys; print(sys.executable)"') do set PYTHON_FULLNAME="%%i"
 echo Creating venv in directory %VENV_DIR% using python %PYTHON_FULLNAME%
 %PYTHON_FULLNAME% -m venv "%VENV_DIR%" >tmp/stdout.txt 2>tmp/stderr.txt
